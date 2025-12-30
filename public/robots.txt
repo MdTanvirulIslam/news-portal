@@ -1,0 +1,24 @@
+# Robots.txt for News Portal
+# Last updated: 2024
+
+User-agent: *
+Allow: /
+
+# Disallow admin area
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+
+# Allow search engine bots to access sitemap
+Sitemap: {{ YOUR_SITE_URL }}/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 10
+
+# Allow specific important URLs
+Allow: /sitemap.xml
+Allow: /sitemap
+
+# Block duplicate content
+Disallow: /api/
+Disallow: /*.json$
