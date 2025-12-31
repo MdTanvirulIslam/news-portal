@@ -216,3 +216,124 @@ if (!function_exists('getReadingTime')) {
         return max(1, $minutes);
     }
 }
+
+if (!function_exists('getUserProfileUrl')) {
+    function getUserProfileUrl($user)
+    {
+        $locale = currentLocale();
+        $userId = is_object($user) ? $user->id : $user;
+
+        // Change from /user/ to /user-profile/
+        return url("/{$locale}/user/{$userId}");
+    }
+}
+
+if (!function_exists('getUserAvatar')) {
+    /**
+     * Get user avatar URL (profile picture or gravatar fallback)
+     *
+     * @param object $user The user object
+     * @param int $size Avatar size in pixels (default: 200)
+     * @return string
+     */
+    function getUserAvatar($user, $size = 200)
+    {
+        // Check if user has uploaded profile picture
+        if (!empty($user->profile_picture)) {
+            return asset('storage/profiles/' . $user->profile_picture);
+        }
+
+        // Gravatar fallback based on email
+        $hash = md5(strtolower(trim($user->email)));
+        return "https://secure.gravatar.com/avatar/{$hash}?s={$size}&d=mm&r=g";
+    }
+}
+
+if (!function_exists('getUserRoleName')) {
+    /**
+     * Get user role name in current language
+     *
+     * @param object $user The user object
+     * @return string
+     */
+    function getUserRoleName($user)
+    {
+        $locale = currentLocale();
+
+        if ($locale === 'bn') {
+            $roles = [
+                'admin' => 'প্রশাসক',
+                'editor' => 'সম্পাদক',
+                'reporter' => 'প্রতিবেদক',
+                'contributor' => 'অবদানকারী',
+            ];
+        } else {
+            $roles = [
+                'admin' => 'Admin',
+                'editor' => 'Editor',
+                'reporter' => 'Reporter',
+                'contributor' => 'Contributor',
+            ];
+        }
+
+        return $roles[$user->role] ?? ucfirst($user->role);
+    }
+}
+
+if (!function_exists('getUserPostCount')) {
+    /**
+     * Get user's published post count
+     *
+     * @param object|int $user The user object or user ID
+     * @return int
+     */
+    function getUserPostCount($user)
+    {
+        $userId = is_object($user) ? $user->id : $user;
+
+        return \App\Models\Post::where('user_id', $userId)
+            ->where('status', 'published')
+            ->where('published_at', '<=', now())
+            ->count();
+    }
+}
+
+if (!function_exists('formatUserRole')) {
+    /**
+     * Format user role with icon and name
+     *
+     * @param object $user The user object
+     * @return string HTML string with icon and role name
+     */
+    function formatUserRole($user)
+    {
+        $icons = [
+            'admin' => 'fa-shield-alt',
+            'editor' => 'fa-pen',
+            'reporter' => 'fa-newspaper',
+            'contributor' => 'fa-user-edit',
+        ];
+
+        $icon = $icons[$user->role] ?? 'fa-user';
+        $roleName = getUserRoleName($user);
+
+        return '<i class="fa-solid ' . $icon . '"></i> ' . $roleName;
+    }
+}
+
+
+// Alternative using route() method
+if (!function_exists('getUserProfileUrlAlt')) {
+    /**
+     * Alternative: Get user profile URL using route helper
+     *
+     * @param object|int $user The user object or user ID
+     * @return string
+     */
+    function getUserProfileUrlAlt($user)
+    {
+        $userId = is_object($user) ? $user->id : $user;
+
+        return route('user.profile', ['id' => $userId]);
+    }
+}

@@ -16,7 +16,7 @@ class WebsiteSettingController extends Controller
     public function index()
     {
         $websiteSettings = WebsiteSetting::getSettings();
-        
+
         // Available options
         $loaderTypes = ['spinner', 'dots', 'bars', 'circle', 'pulse', 'custom'];
         $fonts = [
@@ -32,7 +32,7 @@ class WebsiteSettingController extends Controller
             'Merriweather',
         ];
         $timezones = timezone_identifiers_list();
-        
+
         return view('admin.settings.website.index', compact(
             'websiteSettings',
             'loaderTypes',
@@ -48,6 +48,7 @@ class WebsiteSettingController extends Controller
     {
         try {
             $validated = $request->validate([
+                // General Settings
                 'website_title' => 'nullable|string|max:255',
                 'show_loader' => 'required|boolean',
                 'loader_type' => 'required|string|in:spinner,dots,bars,circle,pulse,custom',
@@ -62,11 +63,27 @@ class WebsiteSettingController extends Controller
                 'body_font' => 'nullable|string|max:100',
                 'timezone' => 'nullable|string|max:100',
                 'posts_per_page' => 'nullable|integer|min:1|max:100',
-                'google_search_console' => 'nullable|string|max:500',
                 'google_adsense' => 'nullable|string|max:500',
                 'google_analytics' => 'nullable|string|max:500',
                 'facebook_pixel' => 'nullable|string|max:500',
                 'maintenance_mode' => 'required|boolean',
+
+                // Social Media URLs
+                'facebook_url' => 'nullable|url|max:255',
+                'twitter_url' => 'nullable|url|max:255',
+                'linkedin_url' => 'nullable|url|max:255',
+                'youtube_url' => 'nullable|url|max:255',
+                'whatsapp_url' => 'nullable|url|max:255',
+                'instagram_url' => 'nullable|url|max:255',
+                'rss_url' => 'nullable|url|max:255',
+
+                // SEO Settings
+                'meta_title' => 'nullable|string|max:60',
+                'meta_description' => 'nullable|string|max:160',
+                'meta_keywords' => 'nullable|string|max:500',
+                'google_verification' => 'nullable|string|max:500',
+                'og_image' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
+
             ]);
 
             $websiteSettings = WebsiteSetting::getSettings();
@@ -75,22 +92,22 @@ class WebsiteSettingController extends Controller
             // Handle loader image upload
             if ($request->hasFile('loader_image')) {
                 $file = $request->file('loader_image');
-                
+
                 if ($file->isValid()) {
                     // Delete old loader image
                     if ($websiteSettings->loader_image) {
                         $websiteSettings->deleteLoaderImage();
                     }
-                    
+
                     // Create directory if needed
                     if (!Storage::disk('public')->exists('loaders')) {
                         Storage::disk('public')->makeDirectory('loaders');
                     }
-                    
+
                     // Store new image
                     $path = $file->store('loaders', 'public');
                     $data['loader_image'] = $path;
-                    
+
                     Log::info('Loader image uploaded', ['path' => $path]);
                 }
             } else {
@@ -98,20 +115,48 @@ class WebsiteSettingController extends Controller
                 $data['loader_image'] = $websiteSettings->loader_image;
             }
 
+            // Handle OG image upload
+            if ($request->hasFile('og_image')) {
+                $file = $request->file('og_image');
+
+                if ($file->isValid()) {
+                    // Delete old OG image
+                    if ($websiteSettings->og_image && file_exists(public_path($websiteSettings->og_image))) {
+                        unlink(public_path($websiteSettings->og_image));
+                    }
+
+                    // Create directory if needed
+                    $directory = public_path('images/seo');
+                    if (!file_exists($directory)) {
+                        mkdir($directory, 0755, true);
+                    }
+
+                    // Store new image in public/images/seo
+                    $filename = 'og-image-' . time() . '.' . $file->getClientOriginalExtension();
+                    $file->move($directory, $filename);
+                    $data['og_image'] = 'images/seo/' . $filename;
+
+                    Log::info('OG image uploaded', ['path' => $data['og_image']]);
+                }
+            } else {
+                // Keep existing OG image
+                $data['og_image'] = $websiteSettings->og_image;
+            }
+
             // Update settings
             WebsiteSetting::updateSettings($data);
-            
+
             Log::info('Website settings updated successfully');
 
             return redirect()->route('admin.settings.website.index')
                 ->with('success', 'Website settings updated successfully!');
-                
+
         } catch (\Exception $e) {
             Log::error('Website settings update failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
+
             return redirect()->route('admin.settings.website.index')
                 ->with('error', 'Failed to update settings: ' . $e->getMessage());
         }

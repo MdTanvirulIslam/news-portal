@@ -11,6 +11,7 @@ class WebsiteSetting extends Model
     use HasFactory;
 
     protected $fillable = [
+        // General Settings
         'website_title',
         'show_loader',
         'loader_type',
@@ -25,11 +26,27 @@ class WebsiteSetting extends Model
         'body_font',
         'timezone',
         'posts_per_page',
-        'google_search_console',
         'google_adsense',
         'google_analytics',
         'facebook_pixel',
         'maintenance_mode',
+
+        // Social Media URLs
+        'facebook_url',
+        'twitter_url',
+        'linkedin_url',
+        'youtube_url',
+        'whatsapp_url',
+        'instagram_url',
+        'rss_url',
+
+        // SEO Settings
+        'meta_title',
+        'meta_description',
+        'meta_keywords',
+        'google_verification',
+        'og_image',
+        'additional_head_code',
     ];
 
     protected $casts = [
@@ -47,6 +64,7 @@ class WebsiteSetting extends Model
 
         if (!$settings) {
             $settings = self::create([
+                // General defaults
                 'website_title' => config('app.name', 'Laravel'),
                 'show_loader' => true,
                 'loader_type' => 'spinner',
@@ -61,11 +79,27 @@ class WebsiteSetting extends Model
                 'body_font' => 'Roboto',
                 'timezone' => 'UTC',
                 'posts_per_page' => 10,
-                'google_search_console' => null,
                 'google_adsense' => null,
                 'google_analytics' => null,
                 'facebook_pixel' => null,
                 'maintenance_mode' => false,
+
+                // Social Media defaults
+                'facebook_url' => null,
+                'twitter_url' => null,
+                'linkedin_url' => null,
+                'youtube_url' => null,
+                'whatsapp_url' => null,
+                'instagram_url' => null,
+                'rss_url' => null,
+
+                // SEO defaults
+                'meta_title' => config('app.name', 'Laravel'),
+                'meta_description' => null,
+                'meta_keywords' => null,
+                'google_verification' => null,
+                'og_image' => null,
+
             ]);
         }
 
@@ -127,6 +161,31 @@ class WebsiteSetting extends Model
     }
 
     /**
+     * Get all social media URLs as array
+     */
+    public function getSocialMediaUrls()
+    {
+        return [
+            'facebook' => $this->facebook_url,
+            'twitter' => $this->twitter_url,
+            'linkedin' => $this->linkedin_url,
+            'youtube' => $this->youtube_url,
+            'whatsapp' => $this->whatsapp_url,
+            'instagram' => $this->instagram_url,
+            'rss' => $this->rss_url,
+        ];
+    }
+
+    /**
+     * Check if a social media URL is set
+     */
+    public function hasSocialMedia($platform)
+    {
+        $field = $platform . '_url';
+        return !empty($this->$field);
+    }
+
+    /**
      * Check if maintenance mode is enabled
      */
     public function isMaintenanceMode()
@@ -140,5 +199,24 @@ class WebsiteSetting extends Model
     public function isLoaderEnabled()
     {
         return $this->show_loader;
+    }
+
+    /**
+     * Get OG image URL
+     */
+    public function getOgImageUrl()
+    {
+        if ($this->og_image) {
+            return asset($this->og_image);
+        }
+        return null;
+    }
+
+    /**
+     * Check if OG image exists
+     */
+    public function hasOgImage()
+    {
+        return $this->og_image && file_exists(public_path($this->og_image));
     }
 }

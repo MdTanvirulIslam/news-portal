@@ -98,23 +98,26 @@
                 @endif
 
                 <!-- MOBILE LANGUAGE SWITCHER -->
-                    <li class="d-lg-none ms-auto">
-                        <a href="{{ switchLocaleRoute('bn') }}"
-                           class="text-white {{ currentLocale() == 'bn' ? 'active-lang' : '' }}">
-                            BN
-                        </a>
-                        |
-                        <a href="{{ switchLocaleRoute('en') }}"
-                           class="text-white {{ currentLocale() == 'en' ? 'active-lang' : '' }}">
-                            EN
-                        </a>
-                    </li>
+                        @php
+                            $currentModel = $page ?? $post ?? $category ?? $tag ?? null;
+                        @endphp
+                        <li class="d-lg-none ms-auto">
+                            <a href="{{ switchLocaleRoute('bn', $currentModel) }}"
+                               class="text-white {{ currentLocale() == 'bn' ? 'active-lang' : '' }}">
+                                BN
+                            </a>
+                            |
+                            <a href="{{ switchLocaleRoute('en', $currentModel) }}"
+                               class="text-white {{ currentLocale() == 'en' ? 'active-lang' : '' }}">
+                                EN
+                            </a>
+                        </li>
                 </ul>
 
                 <!-- DESKTOP LANGUAGE SWITCHER -->
                 @php
                     // Auto-detect if we're on a post, category, or tag page
-                    $model = $post ?? $category ?? $tag ?? null;
+                    $model = $page ?? $post ?? $category ?? $tag ?? null;
                 @endphp
 
                 <ul class="d-none d-lg-flex align-items-center list-unstyled header_top_menu">
