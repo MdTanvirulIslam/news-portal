@@ -2,21 +2,20 @@
 <div class="header-container container-xxl">
     <header class="header navbar navbar-expand-sm expand-header">
 
-        <ul class="navbar-item theme-brand flex-row  text-center">
+        <ul class="navbar-item theme-brand flex-row text-center">
             <li class="nav-item theme-logo">
-                {{--<a href="{{ route("dashboard") }}">
-                    <img src="{{ asset("assets/src/assets/img/favicon-32x32.png") }}" class="navbar-logo" alt="Multifabs Limited">
-                </a>--}}
+                <a href="{{ route('admin.dashboard') }}">
+                    <img src="{{ asset('assets/src/assets/img/favicon-32x32.png') }}" class="navbar-logo" alt="Logo">
+                </a>
             </li>
             <li class="nav-item theme-text">
-                <a href="" class="nav-link"> KDS - Production Monitoring </a>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link"> LYRICS </a>
             </li>
         </ul>
 
-
         <ul class="navbar-item flex-row ms-lg-auto ms-0 action-area">
 
-
+            {{-- Theme Toggle --}}
             <li class="nav-item theme-toggle-item">
                 <a href="javascript:void(0);" class="nav-link theme-toggle">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -40,6 +39,7 @@
                 </a>
             </li>
 
+            {{-- Notifications Dropdown --}}
             <li class="nav-item dropdown notification-dropdown">
                 <a href="javascript:void(0);" class="nav-link dropdown-toggle" id="notificationDropdown"
                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -53,156 +53,103 @@
                 </a>
 
                 <div class="dropdown-menu position-absolute" aria-labelledby="notificationDropdown">
-
                     <div class="notification-scroll">
-
-
                         <div class="drodpown-title notification mt-2">
-                            <h6 class="d-flex justify-content-between"><span
-                                    class="align-self-center">Notifications</span> <span class="badge badge-secondary">16 New</span>
+                            <h6 class="d-flex justify-content-between">
+                                <span class="align-self-center">Notifications</span>
+                                <span class="badge badge-secondary">0 New</span>
                             </h6>
                         </div>
 
-                        <div class="dropdown-item">
-                            <div class="media server-log">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                     stroke-linejoin="round" class="feather feather-server">
-                                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-                                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-                                    <line x1="6" y1="6" x2="6" y2="6"></line>
-                                    <line x1="6" y1="18" x2="6" y2="18"></line>
-                                </svg>
-                                <div class="media-body">
-                                    <div class="data-info">
-                                        <h6 class="">Server Rebooted</h6>
-                                        <p class="">45 min ago</p>
-                                    </div>
-
-                                    <div class="icon-status">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                             stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
-                                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="dropdown-item text-center">
+                            <p class="text-muted">No new notifications</p>
                         </div>
-
-                        <div class="dropdown-item">
-                            <div class="media file-upload">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                     stroke-linejoin="round" class="feather feather-file-text">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                                    <polyline points="10 9 9 9 8 9"></polyline>
-                                </svg>
-                                <div class="media-body">
-                                    <div class="data-info">
-                                        <h6 class="">Kelly Portfolio.pdf</h6>
-                                        <p class="">670 kb</p>
-                                    </div>
-
-                                    <div class="icon-status">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                             stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
-                                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="dropdown-item">
-                            <div class="media ">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                     stroke-linejoin="round" class="feather feather-heart">
-                                    <path
-                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                </svg>
-                                <div class="media-body">
-                                    <div class="data-info">
-                                        <h6 class="">Licence Expiring Soon</h6>
-                                        <p class="">8 hrs ago</p>
-                                    </div>
-
-                                    <div class="icon-status">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                             stroke-linecap="round" stroke-linejoin="round" class="feather feather-x">
-                                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
-
             </li>
 
-            <li class="nav-item dropdown user-profile-dropdown  order-lg-0 order-1">
+            {{-- User Profile Dropdown --}}
+            <li class="nav-item dropdown user-profile-dropdown order-lg-0 order-1">
                 <a href="javascript:void(0);" class="nav-link dropdown-toggle user" id="userProfileDropdown"
                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <div class="avatar-container">
                         <div class="avatar avatar-sm avatar-indicators avatar-online">
-                            <img alt="avatar" src="{{ asset("assets/src/assets/img/avatars-1.svg") }}" class="rounded-circle">
+                            @if(auth()->user()->profile_picture)
+                                <img alt="avatar"
+                                     src="{{ asset('storage/profiles/' . auth()->user()->profile_picture) }}"
+                                     class="rounded-circle">
+                            @else
+                                <img alt="avatar"
+                                     src="{{ asset('assets/src/assets/img/avatars-1.svg') }}"
+                                     class="rounded-circle">
+                            @endif
                         </div>
                     </div>
                 </a>
 
                 <div class="dropdown-menu position-absolute" aria-labelledby="userProfileDropdown">
+                    {{-- User Info Section --}}
                     <div class="user-profile-section">
                         <div class="media mx-auto">
                             <div class="emoji me-2">
                                 &#x1F44B;
                             </div>
                             <div class="media-body">
-                                <h5>{{ auth()->user()->name }} </h5>
-
+                                <h5>{{ auth()->user()->name }}</h5>
+                                <p class="text-muted small mb-0">{{ auth()->user()->role_name }}</p>
                             </div>
                         </div>
                     </div>
+
+                    {{-- Profile Link --}}
                     <div class="dropdown-item">
-                        <a href="">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        <a href="#" class="d-flex align-items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                 stroke-linejoin="round" class="feather feather-user">
+                                 stroke-linejoin="round" class="feather feather-user me-2">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            <span>Profile</span>
+                            <span>My Profile</span>
                         </a>
                     </div>
 
-                    <div class="dropdown-item">
-                        <form method="POST" action="{{ route('admin.logout') }}">
-                            @csrf
-                            <x-dropdown-link :href="route('admin.logout')"
-                                             onclick="event.preventDefault();
-                                            this.closest('form').submit();">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                    {{-- Settings Link (Admin Only) --}}
+                    @if(auth()->user()->role === 'admin')
+                        <div class="dropdown-item">
+                            <a href="{{ route('admin.settings.index') }}" class="d-flex align-items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                      fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                     stroke-linejoin="round" class="feather feather-log-out">
+                                     stroke-linejoin="round" class="feather feather-settings me-2">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M12 1v6m0 6v6m6-12h-6m-6 0H1m17.5 6H18m-6 0H1m17.5 6H18m-6 0H1"></path>
+                                </svg>
+                                <span>Settings</span>
+                            </a>
+                        </div>
+                    @endif
+
+                    <div class="dropdown-divider"></div>
+
+                    {{-- Logout --}}
+                    <div class="dropdown-item">
+                        <form method="POST" action="{{ route('admin.logout') }}" id="logout-form">
+                            @csrf
+                            <a href="#"
+                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                               class="d-flex align-items-center text-danger">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                     stroke-linejoin="round" class="feather feather-log-out me-2">
                                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                                     <polyline points="16 17 21 12 16 7"></polyline>
                                     <line x1="21" y1="12" x2="9" y2="12"></line>
-                                </svg> <span>Log Out</span>
-                            </x-dropdown-link>
+                                </svg>
+                                <span>Log Out</span>
+                            </a>
                         </form>
                     </div>
                 </div>
-
             </li>
         </ul>
     </header>

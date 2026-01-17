@@ -2,40 +2,52 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role',
+        'is_active',
         'address',
         'phone',
         'profile_picture',
-        'role',
-        'is_active',
+        'bio',
+        'designation',
+        'country',
+        'city',
+        'terms_accepted',
+        'copyright_accepted',
+        'profile_completed',
+        'profile_completed_at',
+        'last_login_at',
+        'last_login_ip',
+        'email_verification_token',
+        'email_verification_sent_at',
     ];
 
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -49,46 +61,104 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
-
+            'terms_accepted' => 'boolean',
+            'copyright_accepted' => 'boolean',
+            'profile_completed' => 'boolean',
+            'profile_completed_at' => 'datetime',
+            'last_login_at' => 'datetime',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 
-    // Relationships
-    public function posts()
+    /**
+     * Available user roles
+     */
+    const ROLES = [
+        'admin' => 'Admin',
+        'editor' => 'Editor',
+        'reporter' => 'Reporter',
+        'contributor' => 'Contributor',
+        'listener' => 'Listener',
+        'artist' => 'Artist',
+        'lyricist' => 'Lyricist',
+        'composer' => 'Composer',
+        'label' => 'Label/Owner',
+        'publisher' => 'Publisher',
+    ];
+
+    /**
+     * Roles that require admin approval
+     */
+    const APPROVAL_REQUIRED_ROLES = ['reporter', 'artist', 'lyricist', 'composer', 'label', 'publisher'];
+
+    /**
+     * Check if user's role requires admin approval
+     */
+    public function requiresApproval(): bool
     {
-        return $this->hasMany(Post::class);
+        return in_array($this->role, self::APPROVAL_REQUIRED_ROLES);
     }
 
-    // Role check methods
+    /**
+     * Check if user has completed their profile
+     */
+    public function hasCompletedProfile(): bool
+    {
+        return $this->profile_completed;
+    }
+
+    /**
+     * Check if user is admin
+     */
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
     }
 
+    /**
+     * Check if user is editor
+     */
     public function isEditor(): bool
     {
         return $this->role === 'editor';
     }
 
-    public function isReporter(): bool
+    /**
+     * Check if user has specific role
+     */
+    public function hasRole(string|array $roles): bool
     {
-        return $this->role === 'reporter';
+        if (is_array($roles)) {
+            return in_array($this->role, $roles);
+        }
+        return $this->role === $roles;
     }
 
-    public function isContributor(): bool
+    /**
+     * Get role display name
+     */
+    public function getRoleNameAttribute(): string
     {
-        return $this->role === 'contributor';
+        return self::ROLES[$this->role] ?? ucfirst($this->role);
     }
 
-    public function hasAccess(string $role): bool
+    /**
+     * Posts relationship
+     */
+    public function posts()
     {
-        $roleHierarchy = [
-            'admin' => 4,
-            'editor' => 3,
-            'reporter' => 2,
-            'contributor' => 1,
-        ];
+        return $this->hasMany(\App\Models\Post::class);
+    }
 
-        return $roleHierarchy[$this->role] >= $roleHierarchy[$role];
+    /**
+     * Mark the given user's email as verified.
+     *
+     * @return bool
+     */
+    public function markEmailAsVerified()
+    {
+        return $this->forceFill([
+            'email_verified_at' => $this->freshTimestamp(),
+        ])->save();
     }
 }

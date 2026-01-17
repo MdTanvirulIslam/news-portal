@@ -33,18 +33,48 @@ class AdminAuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
-            // Check if user has admin access
-            if (in_array(Auth::user()->role, ['admin', 'editor', 'reporter', 'contributor'])) {
-                return redirect()->intended(route('admin.dashboard'));
+            $user = Auth::user();
+
+            // Define allowed roles
+            $allowedRoles = [
+                'admin', 'editor', 'reporter', 'contributor',
+                'listener', 'artist', 'lyricist', 'composer', 'label', 'publisher'
+            ];
+
+            // Check if user has allowed role
+            if (!in_array($user->role, $allowedRoles)) {
+                Auth::logout();
+                throw ValidationException::withMessages([
+                    'email' => 'You do not have permission to access this system.',
+                ]);
             }
 
-            // If not admin role, logout
-            Auth::logout();
-            throw ValidationException::withMessages([
-                'email' => 'You do not have admin access.',
+            // Check if email is verified
+            if (!$user->hasVerifiedEmail()) {
+                // Don't logout, just redirect to verification notice
+                return redirect()->route('verification.notice');
+            }
+
+            // Check if account is active (except admin)
+            if (!$user->is_active && $user->role !== 'admin') {
+                Auth::logout();
+                throw ValidationException::withMessages([
+                    'email' => 'Your account is pending admin approval. You will be notified via email once approved.',
+                ]);
+            }
+
+            // Update last login info
+            $user->update([
+                'last_login_at' => now(),
+                'last_login_ip' => $request->ip(),
             ]);
+
+            // Successful login
+            return redirect()->intended(route('admin.dashboard'))
+                ->with('success', 'Welcome back, ' . $user->name . '!');
         }
 
+        // Login failed
         throw ValidationException::withMessages([
             'email' => 'The provided credentials do not match our records.',
         ]);
@@ -60,6 +90,7 @@ class AdminAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('admin.login');
+        return redirect()->route('admin.login')
+            ->with('success', 'You have been logged out successfully.');
     }
 }
