@@ -27,6 +27,22 @@
                 </a>
             </li>
 
+            <!-- PROFILE (Added Here) -->
+            <li class="menu {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.profile.edit') }}" aria-expanded="false" class="dropdown-toggle">
+                    <div class="">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-user">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <span>My Profile</span>
+                        @if(!auth()->user()->profile_completed)
+                            <span class="badge badge-danger ms-2" data-bs-toggle="tooltip" title="Complete your profile">!</span>
+                        @endif
+                    </div>
+                </a>
+            </li>
+
             <!-- Posts -->
             <li class="menu {{ request()->routeIs('admin.posts.*') ? 'active' : '' }}">
                 <a href="#posts" data-bs-toggle="collapse" aria-expanded="{{ request()->routeIs('admin.posts.*') ? 'true' : 'false' }}" class="dropdown-toggle">
@@ -122,7 +138,7 @@
 
             <!-- RSS Feed (Admin & Editor only) -->
             @if(in_array(auth()->user()->role, ['admin', 'editor']))
-                <li class="menu {{ request()->routeIs('admin.rss-feeds.index.*') ? 'active' : '' }}">
+                <li class="menu {{ request()->routeIs('admin.rss-feeds.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.rss-feeds.index') }}" aria-expanded="false" class="dropdown-toggle">
                         <div class="">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss">
@@ -227,7 +243,7 @@
                     </a>
                 </li>
 
-                <!-- Clear Cache (Admin only) - NEW -->
+                <!-- Clear Cache (Admin only) -->
                 <li class="menu">
                     <a href="javascript:void(0);" onclick="clearCache()" class="dropdown-toggle">
                         <div class="">
@@ -240,7 +256,6 @@
                         </div>
                     </a>
                 </li>
-
         @endif
 
         <!-- Logout -->
@@ -260,10 +275,12 @@
         </ul>
     </nav>
 </div>
+
 <!-- Logout Form (hidden) -->
 <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
     @csrf
 </form>
+
 <!-- Cache Clear Form (hidden) -->
 <form id="cache-clear-form" action="{{ route('admin.cache.clear') }}" method="POST" style="display: none;">
     @csrf
@@ -291,4 +308,9 @@
             allowOutsideClick: () => !Swal.isLoading()
         });
     }
+
+    // Initialize tooltips
+    $(document).ready(function() {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    });
 </script>

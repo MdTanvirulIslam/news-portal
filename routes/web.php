@@ -22,7 +22,7 @@ Route::get('/register', function () {
 
 Route::get('/home', function () {
     if (auth()->check()) {
-        $adminRoles = ['admin', 'editor', 'reporter', 'contributor'];
+        $adminRoles = ['admin','editor','reporter','contributor','listener','artist','lyricist','composer','label','publisher'];
         if (in_array(auth()->user()->role, $adminRoles)) {
             return redirect()->route('admin.dashboard');
         }

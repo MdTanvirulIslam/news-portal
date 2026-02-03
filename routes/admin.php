@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\LanguageLogoController;
 use App\Http\Controllers\Admin\WebsiteSettingController;
 use App\Http\Controllers\Admin\EmailSettingController;
 use App\Http\Controllers\Admin\EmailVerificationController;
+use App\Http\Controllers\Admin\ProfileController;
 
 // ========================================
 // GUEST ROUTES (No Authentication Required)
@@ -78,6 +79,13 @@ Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () 
         Route::put('/{post}', [PostController::class, 'update'])->name('update');   // Update Post
         Route::delete('/{post}', [PostController::class, 'destroy'])->name('destroy'); // Delete Post
     });
+
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile/artist', [ProfileController::class, 'updateArtistProfile'])->name('profile.artist.update');
+    Route::post('/profile/file/delete/{field}', [ProfileController::class, 'deleteFile'])->name('profile.file.delete');
+
+    Route::post('/profile/lyricist', [ProfileController::class, 'updateLyricistProfile'])->name('profile.lyricist.update');
+    Route::post('/profile/composer', [ProfileController::class, 'updateComposerProfile'])->name('profile.composer.update');
 
     // ========================================
     // ADMIN ONLY ROUTES
@@ -167,3 +175,5 @@ Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () 
         Route::get('sitemap/download', [App\Http\Controllers\Admin\AdminSitemapController::class, 'download'])->name('sitemap.download');
     });
 });
+
+

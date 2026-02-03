@@ -161,4 +161,55 @@ class User extends Authenticatable
             'email_verified_at' => $this->freshTimestamp(),
         ])->save();
     }
+
+    /**
+     * Artist profile relationship
+     */
+    public function artistProfile()
+    {
+        return $this->hasOne(\App\Models\ArtistProfile::class);
+    }
+    /**
+     * Lyricist Profile relationship
+     */
+    public function lyricistProfile()
+    {
+        return $this->hasOne(\App\Models\LyricistProfile::class);
+    }
+
+    /**
+     * Composer profile relationship
+     */
+    public function composerProfile()
+    {
+        return $this->hasOne(\App\Models\ComposerProfile::class);
+    }
+
+    /**
+     * Get profile based on role
+     */
+    public function roleProfile()
+    {
+        return match($this->role) {
+            'artist' => $this->artistProfile,
+            'lyricist' => $this->lyricistProfile,
+            'composer' => $this->composerProfile,
+            default => null,
+        };
+    }
+
+    /**
+     * Check if user has completed their role-specific profile
+     */
+    public function hasCompletedRoleProfile(): bool
+    {
+        if ($this->role === 'listener') {
+            return true; // Listeners don't need additional profile
+        }
+
+        $profile = $this->roleProfile();
+        return $profile !== null;
+    }
+
+
 }
