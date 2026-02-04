@@ -123,4 +123,9 @@ class ComposerProfile extends Model
             'home_studio' => 'Home Studio (হোম স্টুডিও)',
         ];
     }
+
+    public function verifiedBy()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
+    }
 }

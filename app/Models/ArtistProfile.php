@@ -121,4 +121,9 @@ class ArtistProfile extends Model
             'trumpet' => 'Trumpet',
         ];
     }
+
+    public function verifiedBy()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
+    }
 }

@@ -127,6 +127,11 @@ Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () 
         Route::resource('users', UserController::class)->except(['create', 'store']);
         Route::post('users/{user}/approve', [UserController::class, 'approve'])->name('users.approve');
         Route::post('users/{user}/reject', [UserController::class, 'reject'])->name('users.reject');
+        Route::get('/users/{user}/profile', [UserController::class, 'viewProfile'])->name('users.profile.view');
+        Route::post('/users/{user}/verify-profile', [ProfileController::class, 'verifyProfile'])->name('users.profile.verify');
+        Route::post('/users/{user}/unverify-profile', [ProfileController::class, 'unverifyProfile'])->name('users.profile.unverify');
+        Route::get('/users/{user}/verification-logs', [ProfileController::class, 'getVerificationLogs'])
+            ->name('users.verification.logs');
 
         // Settings
         Route::prefix('settings')->name('settings.')->group(function () {

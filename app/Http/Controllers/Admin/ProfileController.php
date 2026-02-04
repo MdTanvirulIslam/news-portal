@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User; // ADD THIS IMPORT
 use App\Models\ArtistProfile;
 use App\Models\LyricistProfile;
 use App\Models\ComposerProfile;
+use App\Models\ProfileVerificationLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-
 
 class ProfileController extends Controller
 {
@@ -510,5 +511,230 @@ class ProfileController extends Controller
 
         \Log::warning('File not found', ['field' => $field]);
         return response()->json(['success' => false, 'message' => 'File not found'], 404);
+    }
+
+    /**
+     * Verify user profile
+     */
+    public function verifyProfile(Request $request, User $user)
+    {
+        // Fix: Check if user is admin
+        if (auth()->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized action. Only admins can verify profiles.'
+            ], 403);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Determine which profile to verify based on user role
+            switch ($user->role) {
+                case 'artist':
+                    $profile = $user->artistProfile;
+                    break;
+                case 'lyricist':
+                    $profile = $user->lyricistProfile;
+                    break;
+                case 'composer':
+                    $profile = $user->composerProfile;
+                    break;
+                default:
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'This user does not have a verifiable profile.'
+                    ], 400);
+            }
+
+            if (!$profile) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Profile not found.'
+                ], 404);
+            }
+
+            // Check if profile is already verified
+            if ($profile->is_verified) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Profile is already verified.'
+                ], 400);
+            }
+
+            // Verify the profile
+            $profile->update([
+                'is_verified' => true,
+                'verified_at' => now(),
+                'verified_by' => auth()->id(),
+            ]);
+
+            // Log the verification action
+            ProfileVerificationLog::create([
+                'user_id' => $user->id,
+                'profile_type' => $user->role,
+                'admin_id' => auth()->id(),
+                'action' => 'verified',
+                'reason' => $request->input('reason', 'Profile verification completed.'),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile verified successfully!',
+                'verified_at' => $profile->verified_at->format('M d, Y h:i A'),
+                'verified_by' => auth()->user()->name,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Profile verification failed: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'admin_id' => auth()->id(),
+                'exception' => $e
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Unverify user profile
+     */
+    public function unverifyProfile(Request $request, User $user)
+    {
+        // Fix: Check if user is admin
+        if (auth()->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized action. Only admins can unverify profiles.'
+            ], 403);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Determine which profile to unverify based on user role
+            switch ($user->role) {
+                case 'artist':
+                    $profile = $user->artistProfile;
+                    break;
+                case 'lyricist':
+                    $profile = $user->lyricistProfile;
+                    break;
+                case 'composer':
+                    $profile = $user->composerProfile;
+                    break;
+                default:
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'This user does not have a verifiable profile.'
+                    ], 400);
+            }
+
+            if (!$profile) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Profile not found.'
+                ], 404);
+            }
+
+            // Unverify the profile
+            $profile->update([
+                'is_verified' => false,
+                'verified_at' => null,
+                'verified_by' => null,
+            ]);
+
+            // Log the unverification action
+            ProfileVerificationLog::create([
+                'user_id' => $user->id,
+                'profile_type' => $user->role,
+                'admin_id' => auth()->id(),
+                'action' => 'unverified',
+                'reason' => $request->input('reason', 'Verification removed by admin.'),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile verification removed successfully!',
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Profile unverification failed: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'admin_id' => auth()->id(),
+                'exception' => $e
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get verification logs for a user
+     */
+    public function getVerificationLogs(User $user)
+    {
+        // Fix: Check if user is admin
+        if (auth()->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized action.'
+            ], 403);
+        }
+
+        try {
+            $logs = ProfileVerificationLog::where('user_id', $user->id)
+                ->with('admin')
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function($log) {
+                    return [
+                        'id' => $log->id,
+                        'action' => $log->action,
+                        'action_text' => $log->action === 'verified' ? 'Verified' : 'Unverified',
+                        'action_icon' => $log->action === 'verified' ? 'fa-check-circle' : 'fa-times-circle',
+                        'action_color' => $log->action === 'verified' ? 'success' : 'danger',
+                        'reason' => $log->reason,
+                        'admin' => [
+                            'name' => $log->admin->name ?? 'System',
+                            'email' => $log->admin->email ?? '',
+                        ],
+                        'created_at' => $log->created_at->format('M d, Y h:i A'),
+                        'time_ago' => $log->created_at->diffForHumans(),
+                        'timestamp' => $log->created_at->timestamp,
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'logs' => $logs,
+                'total_logs' => $logs->count(),
+                'verified_count' => $logs->where('action', 'verified')->count(),
+                'unverified_count' => $logs->where('action', 'unverified')->count(),
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to get verification logs: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'exception' => $e
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load verification logs: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

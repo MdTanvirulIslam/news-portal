@@ -75,11 +75,6 @@ class LyricistProfile extends Model
         return [
             'bangla' => 'বাংলা',
             'english' => 'English',
-            'hindi' => 'हिन्दी',
-            'urdu' => 'اردو',
-            'arabic' => 'العربية',
-            'spanish' => 'Español',
-            'regional' => 'Regional Dialects',
         ];
     }
 
@@ -94,5 +89,10 @@ class LyricistProfile extends Model
             'not_available' => 'Currently Not Available',
             'commission_only' => 'Commission Work Only',
         ];
+    }
+
+    public function verifiedBy()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 }
